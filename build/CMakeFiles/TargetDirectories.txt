@@ -1,0 +1,3 @@
+/media/xmy/Data/GitHub/dynamics_integration/build/CMakeFiles/edit_cache.dir
+/media/xmy/Data/GitHub/dynamics_integration/build/CMakeFiles/rebuild_cache.dir
+/media/xmy/Data/GitHub/dynamics_integration/build/CMakeFiles/dynamics_integration.dir
