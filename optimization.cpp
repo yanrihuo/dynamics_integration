@@ -23,14 +23,15 @@ int main(int argc, char** argv)
 	Eigen::Vector3d v;
 	vector <Eigen::Vector3d> vehicle_data;
 	FILE *fp1;
-	fp1 = fopen("CanData(copy).csv", "r");//
+	fp1 = fopen("CanData.csv", "r");//
 	fscanf(fp1, "%lf,%lf,%lf", &v[0], &v[1], &v[2]);
 	while (1)
 	{
 		fscanf(fp1, "%lf,%lf,%lf", &v(0), &v(1), &v(2));
 		//cout<<setprecision(11)<<v(0)<<endl;
-		//v(1)=v(1)/3.6;
-		//v(2)=v(2)*3.14159/180;
+		v(1)=v(1)/3.6;
+		v(2)=v(2)*3.14159/180;
+		//cout<<v(1)<<" "<<v(2)<<endl;
 		vehicle_data.push_back(v);
 		if (feof(fp1)) 
 			break;
@@ -38,7 +39,12 @@ int main(int argc, char** argv)
 	fclose(fp1);
 	int m=vehicle_data.size()/5;
 	double para_Pose[(m+1)][7]={0};
-	double para_SpeedBias[(m+1)][9]={0};
+	for (int i = 0; i < m+1; ++i)
+	{
+		para_Pose[i][6]=1;
+		
+	}
+	//double para_SpeedBias[(m+1)][9]={0};
 	DynamicsBase *dynamics_integrations[(m+1)];
 	ceres::Problem problem;
 	ceres::LossFunction *loss_function;
@@ -53,11 +59,14 @@ int main(int argc, char** argv)
 	for(int i=0; i<vehicle_data.size(); i++)
 	{
 		
-		beta=(1-m*vehicle_data[i](1)*vehicle_data[i](1)*a/(2*l*b*k2*3.6*3.6))*b*v(2)*3.14159/180/17.4
-		/l/(1+K*vehicle_data[i](1)*vehicle_data[i](1)/3.6/3.6);
-		omiga(0)=vehicle_data[i](1)/3.6*v(2)*3.14159/180/17.4/l/(1+K*vehicle_data[i](1)*vehicle_data[i](1)/3.6/3.6);
-		vel(1)=vehicle_data[i](1)/3.6*sin(beta);
-		vel(2)=vehicle_data[i](1)/3.6*cos(beta);
+		beta=(1-m*vehicle_data[i](1)*vehicle_data[i](1)*a/(2*l*b*k2))*b*vehicle_data[i](2)/17.4
+		/l/(1+K*vehicle_data[i](1)*vehicle_data[i](1));
+		omiga(0)=vehicle_data[i](1)*vehicle_data[i](2)/17.4/l/(1+K*vehicle_data[i](1)*vehicle_data[i](1));
+		vel(1)=vehicle_data[i](1)*sin(beta);
+		vel(2)=vehicle_data[i](1)*cos(beta);
+		cout<<"beta:"<<beta<<endl;
+		cout<<"vel:"<<vel(1)<<" "<<vel(2)<<endl;
+		//cout<<"omiga:"<<omiga(0)<<endl;
 		dt=(vehicle_data[i](0)-t0)/1000000000;
 		t0=vehicle_data[i](0);
 		int j=i/5;
@@ -68,7 +77,7 @@ int main(int argc, char** argv)
 			//cout<<j<<endl;
 		}
 		//cout<<i<<endl;
-		cout<<"yujifen:"<<j<<endl;
+		//cout<<"yujifen:"<<j<<endl;
 		dynamics_integrations[j]->push_back(dt,vel,omiga);
 	}
 
@@ -78,12 +87,12 @@ int main(int argc, char** argv)
 		
 		ceres::LocalParameterization *local_parameterization = new PoseLocalParameterization();
 		problem.AddParameterBlock(para_Pose[i], 7, local_parameterization);
-		problem.AddParameterBlock(para_SpeedBias[i], 9);
+		//problem.AddParameterBlock(para_SpeedBias[i], 9);
 	}
 	for(int i=0; i<vehicle_data.size()/5; i++)
 	{
 		dynamicsFactor* dynamics_factor = new dynamicsFactor(dynamics_integrations[i]);
-		problem.AddResidualBlock(dynamics_factor, NULL, para_Pose[i], para_SpeedBias[i], para_Pose[i+1], para_SpeedBias[i+1]);
+		problem.AddResidualBlock(dynamics_factor, loss_function, para_Pose[i], para_Pose[i+1]);
 	}
 
 
@@ -110,5 +119,11 @@ int main(int argc, char** argv)
     {
     	cout<<para_Pose[i]<<endl;
     }*/
-    cout<<summary.BriefReport() <<endl;
+    cout<<summary.FullReport() <<endl;
+    for (int i = 0; i < m; ++i)
+    {
+    	for(int j=0;j<7;j++)
+    		cout<<para_Pose[i][j]<<"  ";
+    	cout<<endl;
+    }
 }
