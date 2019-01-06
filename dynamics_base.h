@@ -51,7 +51,7 @@ public:
 		omiga_buf.push_back(omiga);
 
 		propagate(dt, vel, omiga);
-		cout<<"deltaq:"<<delta_q.coeffs()<<endl<<endl<<endl;
+		//cout<<"deltaq:"<<delta_q.coeffs()<<endl<<endl<<endl;
 	}
 
 
