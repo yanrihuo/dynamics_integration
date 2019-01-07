@@ -61,8 +61,8 @@ int main(int argc, char** argv)
 	{
 		//omiga(0)=-vehicle_data[i](1)*vehicle_data[i](2)/18.4/l;
 		//vel(2)=vehicle_data[i](1);
-		beta=(1-m*vehicle_data[i](1)*vehicle_data[i](1)*a/(2*l*b*k2))*b*vehicle_data[i](2)/18.4/l/(1+K*vehicle_data[i](1)*vehicle_data[i](1));
-		omiga(0)=-vehicle_data[i](1)*vehicle_data[i](2)/18.4/l/(1+K*vehicle_data[i](1)*vehicle_data[i](1));
+		beta=(1+m*vehicle_data[i](1)*vehicle_data[i](1)*a/(2*l*b*k2))*b*vehicle_data[i](2)/18.4/l/(1-K*vehicle_data[i](1)*vehicle_data[i](1));
+		omiga(0)=-vehicle_data[i](1)*vehicle_data[i](2)/18.4/l/(1-K*vehicle_data[i](1)*vehicle_data[i](1));
 		vel(1)=vehicle_data[i](1)*sin(beta);
 		vel(2)=vehicle_data[i](1)*cos(beta);
 		//cout<<"beta:"<<beta<<endl;
